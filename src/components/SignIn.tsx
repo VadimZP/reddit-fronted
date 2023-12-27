@@ -3,7 +3,6 @@
 import * as React from "react";
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
-import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
@@ -14,67 +13,35 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { useRouter } from "next/navigation";
-
-function Copyright(props: any) {
-  return (
-    <Typography
-      variant="body2"
-      color="text.secondary"
-      align="center"
-      {...props}
-    >
-      {"Copyright © "}
-      <Link color="inherit" href="https://mui.com/">
-        Your Website
-      </Link>{" "}
-      {new Date().getFullYear()}
-      {"."}
-    </Typography>
-  );
-}
+import { useRequestSignIn } from "@/hooks/reactQuery";
 
 export default function SignIn() {
   const router = useRouter();
 
+  const signInRequest = useRequestSignIn();
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const data = new FormData(event.currentTarget);
+    const formData = new FormData(event.currentTarget);
 
-    try {
-      const res = await fetch("http://localhost:8000/login", {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: data.get("email"),
-          password: data.get("password"),
-        }),
-      });
+    const email: string | null = formData.get("email") as string;
+    const password: string | null = formData.get("password") as string;
 
-      if (!res.ok) {
-        // This will activate the closest `error.js` Error Boundary
-        // @ts-ignore TODO: fix typescript
-        throw new Error(res.message);
-        // TODO: figure out how to get error message form the backend and pass it to "catch" block below (probably add ".json()")
-      }
-
-      const userData = await res.json();
-
-      localStorage.setItem("userData", JSON.stringify(userData.data));
-
-      router.push("/");
-    } catch (error) {
-      // @ts-ignore TODO: fix typescript
-      throw new Error(error);
+    if (email !== null && password !== null) {
+      signInRequest.mutate(
+        { email, password },
+        {
+          onSuccess: () => {
+            router.replace("/");
+          },
+        }
+      );
     }
   };
 
   return (
     <Container component="main" maxWidth="xs">
-      <CssBaseline />
       <Box
         sx={{
           marginTop: 8,
@@ -136,7 +103,6 @@ export default function SignIn() {
           </Grid>
         </Box>
       </Box>
-      <Copyright sx={{ mt: 8, mb: 4 }} />
     </Container>
   );
 }

@@ -1,5 +1,8 @@
+import { AppBar, CssBaseline, Toolbar } from "@mui/material";
+
 import AccountMenu from "@/components/AccountMenu";
-import { AppBar, Box, CssBaseline, Toolbar } from "@mui/material";
+import Providers from "@/utils/Providers";
+
 
 export const metadata = {
   title: "Reddit",
@@ -14,13 +17,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <CssBaseline />
-        <AppBar position="relative">
-          <Toolbar sx={{ justifyContent: "flex-end" }}>
-            <AccountMenu />
-          </Toolbar>
-        </AppBar>
-        {children}
+        <Providers>
+          <CssBaseline />
+          <AppBar position="relative">
+            <Toolbar sx={{ justifyContent: "flex-end" }}>
+              <AccountMenu />
+            </Toolbar>
+          </AppBar>
+          {children}
+        </Providers>
       </body>
     </html>
   );

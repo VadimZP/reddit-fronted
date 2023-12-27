@@ -1,7 +1,8 @@
+import { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-async function getUser(jwt: { jwt: string; value: string }) {
+async function getUser(jwt: RequestCookie) {
   const headers = new Headers();
 
   headers.append("Cookie", `jwt=${jwt.value}`);
@@ -9,7 +10,6 @@ async function getUser(jwt: { jwt: string; value: string }) {
   const res = await fetch("http://localhost:8000/users", {
     headers,
   });
-  console.log("🚀 ~ file: page.tsx:13 ~ getUser ~ res:", res);
 
   if (!res.ok) {
     // This will activate the closest `error.js` Error Boundary

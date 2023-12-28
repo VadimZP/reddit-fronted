@@ -19,7 +19,8 @@
     "@tanstack/react-query-next-experimental": "^5.15.0",
     "next": "latest",
     "react": "latest",
-    "react-dom": "latest"
+    "react-dom": "latest",
+    "react-hook-form": "^7.49.2"
   },
   "devDependencies": {
     "@tanstack/react-query-devtools": "^5.15.0",

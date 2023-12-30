@@ -1,8 +1,9 @@
 import { AppBar, CssBaseline, Toolbar } from "@mui/material";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import AccountMenu from "@/components/AccountMenu";
 import Providers from "@/utils/Providers";
-
 
 export const metadata = {
   title: "Reddit",
@@ -25,6 +26,7 @@ export default function RootLayout({
             </Toolbar>
           </AppBar>
           {children}
+          <ToastContainer />
         </Providers>
       </body>
     </html>

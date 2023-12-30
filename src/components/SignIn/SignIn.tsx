@@ -1,6 +1,9 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
+import { useForm, Controller } from "react-hook-form";
+import { AxiosError } from "axios";
 
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
@@ -11,14 +14,40 @@ import Box from "@mui/material/Box";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
-import { useRouter } from "next/navigation";
-import { CircularProgress } from "@mui/material";
+import { CircularProgress, Snackbar } from "@mui/material";
+import MuiAlert, { AlertProps } from "@mui/material/Alert";
 
 import { useRequestSignIn } from "@/hooks/reactQuery";
 
-import { useForm, Controller } from "react-hook-form";
+
+const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+  props,
+  ref
+) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
+
+const styles = {
+  box: {
+    marginTop: 8,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+  },
+  avatar: {
+    m: 1,
+    bgcolor: "secondary.main",
+  },
+  signInBtn: {
+    mt: 3,
+    mb: 2,
+    height: "40px",
+  },
+};
 
 export default function SignIn() {
+  const [open, setOpen] = React.useState(false);
+
   const router = useRouter();
 
   const signInRequest = useRequestSignIn();
@@ -42,6 +71,9 @@ export default function SignIn() {
           onSuccess: () => {
             router.replace("/");
           },
+          onError: () => {
+            setOpen(true);
+          },
         }
       );
     }
@@ -49,15 +81,8 @@ export default function SignIn() {
 
   return (
     <Container component="main" maxWidth="xs">
-      <Box
-        sx={{
-          marginTop: 8,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
-        <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}>
+      <Box sx={styles.box}>
+        <Avatar sx={styles.avatar}>
           <LockOutlinedIcon />
         </Avatar>
         <Typography component="h1" variant="h5">
@@ -112,7 +137,7 @@ export default function SignIn() {
             type="submit"
             fullWidth
             variant="contained"
-            sx={{ mt: 3, mb: 2, height: "40px" }}
+            sx={styles.signInBtn}
           >
             {signInRequest.isPending ? (
               <CircularProgress size={24} />
@@ -120,6 +145,7 @@ export default function SignIn() {
               "Sign In"
             )}
           </Button>
+
           <Grid container>
             <Grid item xs>
               <Link href="#" variant="body2">
@@ -134,6 +160,18 @@ export default function SignIn() {
           </Grid>
         </form>
       </Box>
+      <Snackbar open={open} autoHideDuration={4000}>
+        <Alert severity="error" sx={{ width: "100%" }}>
+          {signInRequest.error
+            ? (
+                (signInRequest?.error as AxiosError).response?.data as {
+                  message: string;
+                  statusCode: number;
+                }
+              ).message
+            : null}
+        </Alert>
+      </Snackbar>
     </Container>
   );
 }

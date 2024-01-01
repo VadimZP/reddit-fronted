@@ -1,41 +1,63 @@
 import { useMutation } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
+import { z } from "zod";
+
+function throwOnError(error: unknown) {
+  console.log(error)
+  if (error instanceof AxiosError && error.response) {
+    return error.response.status >= 500;
+  }
+
+  return false;
+}
+
+export const UserSchema = z.object({
+  id: z.number(),
+  email: z.string(),
+  username: z.string(),
+  createdAt: z.string(),
+  updatedAt: z.string()
+});
+
+interface RequestSignUpPayload {
+  email: string
+  username: string
+  password: string
+}
+
+async function signUpAPIRequest(payload: RequestSignUpPayload) {
+  const response = await axios.post("http://localhost:8000/login", payload, { withCredentials: true });
+
+  return UserSchema.parse(response.data);
+}
+
+export function useRequestSignUp() {
+  return useMutation({
+    mutationFn: signUpAPIRequest,
+    onSuccess: (data) => {
+      console.log(data)
+    },
+    throwOnError,
+  });
+}
 
 interface RequestSignInPayload {
   email: string
   password: string
 }
 
-interface RequestSignInResponse {
-  id: number
-  email: string
-  username: string
-  password: string
-  createdAt: Date
-  updatedAt: Date
+async function signInAPIRequest(payload: RequestSignInPayload) {
+  const response = await axios.post("http://localhost:8000/login", payload, { withCredentials: true });
+
+  return UserSchema.parse(response.data);
 }
 
-/* fetch("http://localhost:8000/login", {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(signInPayload),
-      }) */
-
 export function useRequestSignIn() {
-  return useMutation<Response, unknown, RequestSignInPayload>({
-    mutationFn: async (signInPayload) => axios.post("http://localhost:8000/login", signInPayload),
-    onSuccess: async (response) => {
-      console.log("🚀 ~ file: reactQuery.ts:31 ~ onSuccess: ~ response:", response)
-      const { data }: { data: RequestSignInResponse } = await response.json();
-
+  return useMutation({
+    mutationFn: signInAPIRequest,
+    onSuccess: (data) => {
       localStorage.setItem("userData", JSON.stringify(data));
     },
-    onError: (error, variables, context) => {},
-    // 🚀 only server errors will go to the Error Boundary 
-    // @ts-ignore
-    throwOnError: (error) => error.response?.status >= 500,
+    throwOnError,
   });
 }

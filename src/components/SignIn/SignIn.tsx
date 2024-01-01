@@ -19,7 +19,6 @@ import MuiAlert, { AlertProps } from "@mui/material/Alert";
 
 import { useRequestSignIn } from "@/hooks/reactQuery";
 
-
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,
   ref
@@ -61,6 +60,7 @@ export default function SignIn() {
       email: "",
       password: "",
     },
+    mode: "onBlur",
   });
 
   const onSubmit = (data: any) => {

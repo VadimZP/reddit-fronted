@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-import SignIn from "./SignIn";
+import SignUp from "./SignUp";
 
 function setup(jsx: JSX.Element) {
   return {
@@ -18,17 +18,17 @@ jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
 }));
 
-describe("Sign In component", () => {
+describe("Sign Up component", () => {
   const queryClient = new QueryClient();
 
   it("renders it self", () => {
     render(
       <QueryClientProvider client={queryClient}>
-        <SignIn />
+        <SignUp />
       </QueryClientProvider>
     );
 
-    const heading = screen.getAllByText(/sign in/i);
+    const heading = screen.getAllByText(/sign up/i);
 
     expect(heading[0]).toBeInTheDocument();
   });
@@ -36,7 +36,7 @@ describe("Sign In component", () => {
   it("renders email input", () => {
     render(
       <QueryClientProvider client={queryClient}>
-        <SignIn />
+        <SignUp />
       </QueryClientProvider>
     );
 
@@ -48,7 +48,7 @@ describe("Sign In component", () => {
   it("renders password input", () => {
     render(
       <QueryClientProvider client={queryClient}>
-        <SignIn />
+        <SignUp />
       </QueryClientProvider>
     );
 
@@ -60,7 +60,7 @@ describe("Sign In component", () => {
   test("allows a user to enter a valid email", async () => {
     const { user } = setup(
       <QueryClientProvider client={queryClient}>
-        <SignIn />
+        <SignUp />
       </QueryClientProvider>
     );
 
@@ -74,7 +74,7 @@ describe("Sign In component", () => {
   test("shows an error message for an invalid email", async () => {
     const { user } = setup(
       <QueryClientProvider client={queryClient}>
-        <SignIn />
+        <SignUp />
       </QueryClientProvider>
     );
 
@@ -87,10 +87,10 @@ describe("Sign In component", () => {
     expect(screen.getByText(/invalid email format/i)).toBeInTheDocument();
   });
 
-  test("calls sign in button API request", async () => {
+  test("calls sign up button API request", async () => {
     const { user } = setup(
       <QueryClientProvider client={queryClient}>
-        <SignIn />
+        <SignUp />
       </QueryClientProvider>
     );
 
@@ -98,13 +98,17 @@ describe("Sign In component", () => {
 
     await user.type(emailInput, "test@gmail.com");
 
+    const usernameInput = screen.getByLabelText(/username/i);
+
+    await user.type(usernameInput, "testUserName");
+
     const passwordInput = screen.getByLabelText(/password/i);
 
-    await user.type(passwordInput, "testtest");
+    await user.type(passwordInput, "testTest");
 
-    const signInBtn = screen.getByRole("button", { name: /sign in/i });
+    const signUpBtn = screen.getByRole("button", { name: /sign up/i });
 
-    await user.click(signInBtn);
+    await user.click(signUpBtn);
 
     await screen.findByRole("progressbar");
   });

@@ -3,7 +3,6 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
-import { AxiosError } from "axios";
 
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
@@ -14,7 +13,7 @@ import Box from "@mui/material/Box";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
-import { CircularProgress, Snackbar } from "@mui/material";
+import { CircularProgress } from "@mui/material";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
 
 import { useRequestSignIn } from "@/hooks/reactQuery";
@@ -160,18 +159,6 @@ export default function SignIn() {
           </Grid>
         </form>
       </Box>
-      <Snackbar open={open} autoHideDuration={4000}>
-        <Alert severity="error" sx={{ width: "100%" }}>
-          {signInRequest.error
-            ? (
-                (signInRequest?.error as AxiosError).response?.data as {
-                  message: string;
-                  statusCode: number;
-                }
-              ).message
-            : null}
-        </Alert>
-      </Snackbar>
     </Container>
   );
 }

@@ -3,7 +3,6 @@ import axios, { AxiosError } from "axios";
 import { z } from "zod";
 
 function throwOnError(error: unknown) {
-  console.log(error)
   if (error instanceof AxiosError && error.response) {
     return error.response.status >= 500;
   }

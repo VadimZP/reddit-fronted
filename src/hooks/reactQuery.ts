@@ -60,3 +60,32 @@ export function useRequestSignIn() {
     throwOnError,
   });
 }
+
+export const CommunitySchema = z.object({
+  id: z.number(),
+  title: z.string(),
+  createdAt: z.string(),
+  creatorId: z.number(),
+});
+
+interface RequestCreateCommunityPayload {
+  title: string
+  creatorId: number
+}
+
+async function createCommunityAPIRequest(payload: RequestCreateCommunityPayload) {
+  const response = await axios.post("http://localhost:8000/communities", payload, { withCredentials: true });
+
+  return CommunitySchema.parse(response.data);
+}
+
+export function useRequestCreateCommunity() {
+  return useMutation({
+    mutationFn: createCommunityAPIRequest,
+    onSuccess: (data) => {
+      console.log('====', data)
+      // localStorage.setItem("userData", JSON.stringify(data));
+    },
+    throwOnError,
+  });
+}

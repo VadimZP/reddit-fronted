@@ -13,12 +13,13 @@ import { Groups } from "@mui/icons-material";
 import {
   Box,
   Button,
-  Grid,
-  Link,
+  CircularProgress,
   Modal,
   TextField,
   Typography,
 } from "@mui/material";
+import { useRequestCreateCommunity } from "@/hooks/reactQuery";
+import { Controller, useForm } from "react-hook-form";
 
 const style = {
   position: "absolute" as "absolute",
@@ -33,6 +34,8 @@ const style = {
 };
 
 export default function AccountMenu() {
+  const createCommunityRequest = useRequestCreateCommunity();
+
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
@@ -48,27 +51,36 @@ export default function AccountMenu() {
   };
   const handleCloseModal = () => setOpenModal(false);
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const {
+    control,
+    formState: { errors, isValid },
+    handleSubmit,
+  } = useForm({
+    defaultValues: {
+      title: "",
+      creatorId: null,
+    },
+    mode: "onBlur",
+  });
 
+  const onSubmit = (data: any) => {
     const userData = localStorage.getItem("userData");
     if (userData === null) return;
 
     const parsedUserData = JSON.parse(userData);
 
-    const data = new FormData(event.currentTarget);
-
-    const res = await fetch("http://localhost:8000/communities", {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        title: data.get("title"),
-        creatorId: parsedUserData.id,
-      }),
-    });
+    if (isValid) {
+      createCommunityRequest.mutate(
+        { title: data.title, creatorId: parsedUserData.id },
+        {
+          onSuccess: (data) => {
+            console.log('YES', data)
+          },
+          onError: () => {
+          },
+        }
+      );
+    }
   };
 
   return (
@@ -155,31 +167,46 @@ export default function AccountMenu() {
           <Typography id="modal-modal-description" sx={{ mt: 2 }}>
             Type your community title
           </Typography>
-          <Box
-            component="form"
-            noValidate
-            onSubmit={handleSubmit}
-            sx={{ mt: 3 }}
-          >
-            <TextField
-              required
-              fullWidth
-              id="title"
-              label="Title"
-              name="title"
-              autoComplete="title"
-            />
-            <Button
-              type="submit"
-              // fullWidth
-              variant="contained"
-            >
-              Create
-            </Button>
-            <Button variant="outlined" onClick={handleCloseModal}>
-              Close
-            </Button>
-          </Box>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <Box sx={{ mt: 3 }}>
+              <Controller
+                name="title"
+                control={control}
+                rules={{
+                  required: true,
+                }}
+                render={({ field }) => (
+                  <TextField
+                    margin="normal"
+                    fullWidth
+                    id="title"
+                    label="Community title"
+                    autoComplete="title"
+                    autoFocus
+                    helperText={errors.title?.message}
+                    error={!!errors.title?.message}
+                    {...field}
+                  />
+                )}
+              />
+              <Button
+                disabled={createCommunityRequest.isPending || !isValid}
+                type="submit"
+                // fullWidth
+                variant="contained"
+                // sx={styles.signInBtn}
+              >
+                {createCommunityRequest.isPending ? (
+                  <CircularProgress size={24} />
+                ) : (
+                  "Submit"
+                )}
+              </Button>
+              <Button variant="outlined" onClick={handleCloseModal}>
+                Close
+              </Button>
+            </Box>
+          </form>
         </Box>
       </Modal>
     </React.Fragment>

@@ -11,6 +11,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ReactQueryStreamedHydration } from "@tanstack/react-query-next-experimental";
 import { ZodError } from "zod";
 import { toast } from "react-toastify";
+import { AxiosError } from "axios";
 
 function Providers({ children }: React.PropsWithChildren) {
   const [client] = React.useState(
@@ -26,6 +27,10 @@ function Providers({ children }: React.PropsWithChildren) {
             const { fieldErrors } = error.flatten((issue) => issue.message);
 
             toast.error(JSON.stringify(fieldErrors, null, 2));
+          }
+
+          if (error instanceof AxiosError && error.response) {
+            toast.error(error.response.data.message);
           }
         },
       }),

@@ -1,6 +1,11 @@
 "use client";
 
-import * as React from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+
 import Avatar from "@mui/material/Avatar";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
@@ -18,8 +23,9 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+
 import { useRequestCreateCommunity } from "@/hooks/reactQuery";
-import { Controller, useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 
 const style = {
   position: "absolute" as "absolute",
@@ -33,37 +39,35 @@ const style = {
   p: 4,
 };
 
+const createCommunitySchema = z.object({
+  title: z.string().min(4).max(30),
+});
+
+type CreateCommunitySchemaSchemaType = z.infer<typeof createCommunitySchema>;
+
 export default function AccountMenu() {
+  const router = useRouter();
+
   const createCommunityRequest = useRequestCreateCommunity();
 
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
 
-  const [openModal, setOpenModal] = React.useState(false);
-  const handleOpenModal = () => {
-    setOpenModal(true);
-  };
-  const handleCloseModal = () => setOpenModal(false);
+  const [openModal, setOpenModal] = useState(false);
 
   const {
     control,
     formState: { errors, isValid },
     handleSubmit,
-  } = useForm({
+  } = useForm<CreateCommunitySchemaSchemaType>({
+    resolver: zodResolver(createCommunitySchema),
     defaultValues: {
       title: "",
-      creatorId: null,
     },
-    mode: "onBlur",
   });
 
-  const onSubmit = (data: any) => {
+  const onSubmit = (data: CreateCommunitySchemaSchemaType) => {
+    
     const userData = localStorage.getItem("userData");
     if (userData === null) return;
 
@@ -73,20 +77,27 @@ export default function AccountMenu() {
       createCommunityRequest.mutate(
         { title: data.title, creatorId: parsedUserData.id },
         {
-          onSuccess: (data) => {
-            console.log('YES', data)
-          },
-          onError: () => {
+          onSuccess: () => {
+            toast.success("Community successfully created!");
+            setOpenModal(false);
           },
         }
       );
     }
   };
 
+  const navigateToProfile = () => {
+    const userData = localStorage.getItem("userData");
+    if (userData === null) return;
+
+    const parsedUserData = JSON.parse(userData);
+    router.push(`/users/${parsedUserData.username}`);
+  }
+
   return (
-    <React.Fragment>
+    <>
       <IconButton
-        onClick={handleClick}
+        onClick={(event) => setAnchorEl(event.currentTarget)}
         size="small"
         aria-controls={open ? "account-menu" : undefined}
         aria-haspopup="true"
@@ -98,8 +109,8 @@ export default function AccountMenu() {
         anchorEl={anchorEl}
         id="account-menu"
         open={open}
-        onClose={handleClose}
-        onClick={handleClose}
+        onClose={() => setAnchorEl(null)}
+        onClick={() => setAnchorEl(null)}
         PaperProps={{
           elevation: 0,
           sx: {
@@ -129,23 +140,23 @@ export default function AccountMenu() {
         transformOrigin={{ horizontal: "right", vertical: "top" }}
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
       >
-        <MenuItem onClick={handleClose}>
+        <MenuItem onClick={navigateToProfile}>
           <Avatar /> Profile
         </MenuItem>
         <Divider />
-        <MenuItem onClick={handleOpenModal}>
+        <MenuItem onClick={() => setOpenModal(true)}>
           <ListItemIcon>
             <Groups />
           </ListItemIcon>
           Create a Community
         </MenuItem>
-        <MenuItem onClick={handleClose}>
+        <MenuItem onClick={() => setOpenModal(true)}>
           <ListItemIcon>
             <Settings />
           </ListItemIcon>
           Settings
         </MenuItem>
-        <MenuItem onClick={handleClose}>
+        <MenuItem onClick={() => setOpenModal(true)}>
           <ListItemIcon>
             <Logout />
           </ListItemIcon>
@@ -153,62 +164,51 @@ export default function AccountMenu() {
         </MenuItem>
       </Menu>
 
-      {/* Modal */}
       <Modal
         open={openModal}
-        onClose={handleClose}
+        onClose={() => setAnchorEl(null)}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
         <Box sx={style}>
           <Typography id="modal-modal-title" variant="h6" component="h2">
-            Create a Community
-          </Typography>
-          <Typography id="modal-modal-description" sx={{ mt: 2 }}>
             Type your community title
           </Typography>
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <Box sx={{ mt: 3 }}>
-              <Controller
-                name="title"
-                control={control}
-                rules={{
-                  required: true,
-                }}
-                render={({ field }) => (
-                  <TextField
-                    margin="normal"
-                    fullWidth
-                    id="title"
-                    label="Community title"
-                    autoComplete="title"
-                    autoFocus
-                    helperText={errors.title?.message}
-                    error={!!errors.title?.message}
-                    {...field}
-                  />
-                )}
+
+          <Controller
+            name="title"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                margin="normal"
+                fullWidth
+                id="title"
+                label="Community title"
+                autoComplete="title"
+                autoFocus
+                helperText={errors.title?.message}
+                error={!!errors.title?.message}
+                {...field}
               />
-              <Button
-                disabled={createCommunityRequest.isPending || !isValid}
-                type="submit"
-                // fullWidth
-                variant="contained"
-                // sx={styles.signInBtn}
-              >
-                {createCommunityRequest.isPending ? (
-                  <CircularProgress size={24} />
-                ) : (
-                  "Submit"
-                )}
-              </Button>
-              <Button variant="outlined" onClick={handleCloseModal}>
-                Close
-              </Button>
-            </Box>
-          </form>
+            )}
+          />
+
+          <Button
+            disabled={createCommunityRequest.isPending}
+            variant="contained"
+            onClick={handleSubmit(onSubmit)}
+          >
+            {createCommunityRequest.isPending ? (
+              <CircularProgress size={24} />
+            ) : (
+              "Submit"
+            )}
+          </Button>
+          <Button variant="outlined" onClick={() => setOpenModal(false)}>
+            Close
+          </Button>
         </Box>
       </Modal>
-    </React.Fragment>
+    </>
   );
 }

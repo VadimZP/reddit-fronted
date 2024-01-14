@@ -33,9 +33,9 @@ async function signUpAPIRequest(payload: RequestSignUpPayload) {
 export function useRequestSignUp() {
   return useMutation({
     mutationFn: signUpAPIRequest,
-    onSuccess: (data) => {
+ /*    onSuccess: (data) => {
       console.log(data)
-    },
+    }, */
     throwOnError,
   });
 }
@@ -82,10 +82,9 @@ async function createCommunityAPIRequest(payload: RequestCreateCommunityPayload)
 export function useRequestCreateCommunity() {
   return useMutation({
     mutationFn: createCommunityAPIRequest,
-    onSuccess: (data) => {
+   /*  onSuccess: (data) => {
       console.log('====', data)
-      // localStorage.setItem("userData", JSON.stringify(data));
-    },
+    }, */
     throwOnError,
   });
 }

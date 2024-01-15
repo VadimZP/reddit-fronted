@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
 import { z } from "zod";
 
@@ -33,9 +33,6 @@ async function signUpAPIRequest(payload: RequestSignUpPayload) {
 export function useRequestSignUp() {
   return useMutation({
     mutationFn: signUpAPIRequest,
- /*    onSuccess: (data) => {
-      console.log(data)
-    }, */
     throwOnError,
   });
 }
@@ -82,9 +79,24 @@ async function createCommunityAPIRequest(payload: RequestCreateCommunityPayload)
 export function useRequestCreateCommunity() {
   return useMutation({
     mutationFn: createCommunityAPIRequest,
-   /*  onSuccess: (data) => {
-      console.log('====', data)
-    }, */
     throwOnError,
+  });
+}
+
+interface RequestGetCommunitiesPayload {
+  userId: number
+}
+
+export async function getCommunitiesAPIRequest(payload: RequestGetCommunitiesPayload) {
+  const response = await axios.get(`http://localhost:8000/${payload.userId}/communities`);
+
+  // return CommunitySchema.parse(response.data);
+  return response.data;
+}
+
+export function useRequestGetCommunities(payload: RequestGetCommunitiesPayload) {
+  return useQuery({
+    queryKey: ['communities'],
+    queryFn: () => getCommunitiesAPIRequest(payload),
   });
 }

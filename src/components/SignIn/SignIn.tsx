@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
+import Cookies from 'js-cookie';
 
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
@@ -67,7 +68,9 @@ export default function SignIn() {
       signInRequest.mutate(
         { email: data.email, password: data.password },
         {
-          onSuccess: () => {
+          onSuccess: (data) => {
+            Cookies.set('userId', `${data.id}`);
+
             router.replace("/");
           },
           onError: () => {

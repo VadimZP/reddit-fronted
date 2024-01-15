@@ -2,10 +2,10 @@ import { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-async function getUser(jwt: RequestCookie) {
+async function getUser(jwt: string) {
   const headers = new Headers();
 
-  headers.append("Cookie", `jwt=${jwt.value}`);
+  headers.append("Cookie", `jwt=${jwt}`);
 
   const res = await fetch("http://localhost:8000/users", {
     headers,
@@ -24,7 +24,7 @@ async function getUser(jwt: RequestCookie) {
 export default async function HomePage() {
   const cookieStore = cookies();
 
-  const jwt = cookieStore.get("jwt");
+  const jwt = cookieStore.get("jwt")?.value;
 
   if (!jwt) {
     redirect("/signin");

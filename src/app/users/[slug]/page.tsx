@@ -1,9 +1,12 @@
-import axios from "axios";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import axios from "axios";
+
+import BasicTabs from "@/components/Tabs/Tabs";
 
 async function getCommunitiesBy(jwt: string, userId: string) {
   let res;
+
   try {
     res = await axios.get(`http://localhost:8000/users/${userId}/communities`, {
       headers: {
@@ -19,18 +22,16 @@ async function getCommunitiesBy(jwt: string, userId: string) {
 
 export default async function Page({ params }: { params: { slug: string } }) {
   const cookieStore = cookies();
-
   const userId = cookieStore.get("userId")?.value;
-
   const jwt = cookieStore.get("jwt")?.value;
 
   if (!jwt) {
     redirect("/signin");
   }
 
-  if (!userId) return <p>no user id</p>;
+  if (!userId) return <p>No user id</p>;
 
-  const res = await getCommunitiesBy(jwt, userId);
+  const communities = await getCommunitiesBy(jwt, userId);
 
-  return <div>Profile {params.slug}</div>;
+  return <BasicTabs communities={communities} />;
 }

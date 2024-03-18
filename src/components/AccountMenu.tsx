@@ -43,7 +43,7 @@ const createCommunitySchema = z.object({
   title: z.string().min(4).max(30),
 });
 
-type CreateCommunitySchemaSchemaType = z.infer<typeof createCommunitySchema>;
+type CreateCommunitySchemaType = z.infer<typeof createCommunitySchema>;
 
 export default function AccountMenu() {
   const router = useRouter();
@@ -59,14 +59,14 @@ export default function AccountMenu() {
     control,
     formState: { errors, isValid },
     handleSubmit,
-  } = useForm<CreateCommunitySchemaSchemaType>({
+  } = useForm<CreateCommunitySchemaType>({
     resolver: zodResolver(createCommunitySchema),
     defaultValues: {
       title: "",
     },
   });
 
-  const onSubmit = (data: CreateCommunitySchemaSchemaType) => {
+  const onSubmit = (data: CreateCommunitySchemaType) => {
     
     const userData = localStorage.getItem("userData");
     if (userData === null) return;

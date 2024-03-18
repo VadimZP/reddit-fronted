@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
-import Cookies from 'js-cookie';
+// import Cookies from 'js-cookie';
 
 import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
@@ -18,6 +18,7 @@ import { CircularProgress } from "@mui/material";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
 
 import { useRequestSignIn } from "@/hooks/reactQuery";
+import { setCookie } from "cookies-next";
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,
@@ -69,7 +70,9 @@ export default function SignIn() {
         { email: data.email, password: data.password },
         {
           onSuccess: (data) => {
-            Cookies.set('userId', `${data.id}`);
+            // Cookies.set('userId', `${data.id}`);
+            setCookie('user', );
+
 
             router.replace("/");
           },
